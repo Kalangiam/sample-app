@@ -1,14 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import AxiosService from '../utils/AxiosService';
 import ApiRoutes from '../utils/ApiRoutes';
+import toast from 'react-hot-toast'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 function Register() {
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
+    const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+
     let navigate = useNavigate()
+
+    useEffect(() => {
+        sessionStorage.clear()
+    }, [])
 
     const handleLogin = async (e) => {
 
@@ -23,11 +36,13 @@ function Register() {
             })
 
             if (res.status === 200) {
+                toast.success("Registered Successfully")
                 navigate('/login')
             }
         } catch (error) {
             console.error("Error Response:", error.response);  // Log detailed error response
             console.error("Error Message:", error.message);    // Log error message
+            toast.error(error.response.data.message)
         }
 
     }
@@ -56,7 +71,7 @@ function Register() {
 
                                     <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-primary btn-floating mx-1">
                                         <i className="fab fa-linkedin-in"></i>
-                                    </button>
+                                    </button>   
                                 </div>
 
                                 <div className="divider d-flex align-items-center my-4">
@@ -75,16 +90,42 @@ function Register() {
                                     <label className="form-label" htmlFor="form3Example3">Email address</label>
                                 </div>
 
-                                <div data-mdb-input-init className="form-outline mb-3">
-                                    <input type="password" id="password" className="form-control form-control-lg"
-                                        placeholder="Enter password" name="password" />
-                                    <label className="form-label" htmlFor="form3Example4">Password</label>
-                                </div>
+                                <div>
+                                    {/* Password Field */}
+                                    <div data-mdb-input-init className="form-outline mb-3 position-relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            id="password"
+                                            className="form-control form-control-lg"
+                                            placeholder="Enter password"
+                                            name="password"
+                                        />
+                                        <label className="form-label" htmlFor="password">Password</label>
+                                        <FontAwesomeIcon
+                                            icon={showPassword ? faEyeSlash : faEye}
+                                            onClick={togglePasswordVisibility}
+                                            className="position-absolute"
+                                            style={{ right: "10px", top: "10px", cursor: "pointer" }}
+                                        />
+                                    </div>
 
-                                <div data-mdb-input-init className="form-outline mb-3">
-                                    <input type="password" id="confirmpassword" className="form-control form-control-lg"
-                                        placeholder="Confirm password" name="confirmpassword" />
-                                    <label className="form-label" htmlFor="form3Example4">Confirm Password</label>
+                                    {/* Confirm Password Field */}
+                                    <div data-mdb-input-init className="form-outline mb-3 position-relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            id="confirmpassword"
+                                            className="form-control form-control-lg"
+                                            placeholder="Confirm password"
+                                            name="confirmpassword"
+                                        />
+                                        <label className="form-label" htmlFor="confirmpassword">Confirm Password</label>
+                                        <FontAwesomeIcon
+                                            icon={showConfirmPassword ? faEyeSlash : faEye}
+                                            onClick={toggleConfirmPasswordVisibility}
+                                            className="position-absolute"
+                                            style={{ right: "10px", top: "10px", cursor: "pointer" }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="d-flex justify-content-between align-items-center">
@@ -92,7 +133,7 @@ function Register() {
                                         <label className="form-check-label" htmlFor="form2Example3">
                                         </label>
                                     </div>
-                                    <a href="#!" className="text-body">Forgot password?</a>
+                                    <Link onClick={()=>navigate('/forget-password')} className="text-body">Forgot password?</Link>
                                 </div>
 
                                 <div className="text-center text-lg-start mt-4 pt-2">

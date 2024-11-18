@@ -1,14 +1,65 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import AxiosService from '../utils/AxiosService';
+import ApiRoutes from '../utils/ApiRoutes';
+import toast from 'react-hot-toast'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+
 
 
 
 function Login() {
 
+    const [showPassword, setShowPassword] = useState(false);
+
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
+
+
     let navigate = useNavigate()
+
+    useEffect(() => {
+        sessionStorage.clear()
+    }, [])
+
+    const handleLogin = async (e) => {
+        e.preventDefault()
+        try {
+            const formData = new FormData(e.target);
+            const formProps = Object.fromEntries(formData);
+
+            let res = await AxiosService.post(ApiRoutes.USER_LOGIN.path, formProps, {
+                authenticate: ApiRoutes.USER_LOGIN.authenticate
+            })
+            if (res.status === 200) {
+                sessionStorage.setItem('token', res.data.token)
+                // sessionStorage.setItem('role', res.data.role)
+                // sessionStorage.setItem('name', res.data.name)
+                toast.success("Login Successful")
+                navigate('/')
+
+
+            }
+            else {
+                toast.error(res.data.message)
+                console.log("error occured")
+            }
+        } catch (error) {
+            toast.error("Invalid Credentials")
+            // Check if error.response exists before accessing its properties
+            if (error.response) {
+                console.log("error", error.response.data.message);
+            } else {
+                console.log("error", error.message || "An unknown error occurred");
+            }
+        }
+
+    }
+
 
     return (
         <div>
@@ -20,7 +71,7 @@ function Login() {
                                 className="img-fluid" alt="Sample image" />
                         </div>
                         <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                            <form>
+                            <form action='' onSubmit={handleLogin}>
                                 <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
                                     <p className="lead fw-normal mb-0 me-3">Sign in with</p>
                                     <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-primary btn-floating mx-1">
@@ -43,15 +94,27 @@ function Login() {
 
                                 <div data-mdb-input-init className="form-outline mb-4">
                                     <input type="email" id="email" className="form-control form-control-lg"
-                                        placeholder="Enter a valid email address" />
+                                        placeholder="Enter a valid email address" name="email" />
                                     <label className="form-label" htmlFor="form3Example3">Email address</label>
                                 </div>
 
-                                <div data-mdb-input-init className="form-outline mb-3">
-                                    <input type="password" id="password" className="form-control form-control-lg"
-                                        placeholder="Enter password" />
-                                    <label className="form-label" htmlFor="form3Example4">Password</label>
+                                <div data-mdb-input-init className="form-outline mb-3 position-relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        id="password"
+                                        className="form-control form-control-lg"
+                                        placeholder="Enter password"
+                                        name="password"
+                                    />
+                                    <label className="form-label" htmlFor="password">Password</label>
+                                    <FontAwesomeIcon
+                                        icon={showPassword ? faEyeSlash : faEye}
+                                        onClick={togglePasswordVisibility}
+                                        className="position-absolute"
+                                        style={{ right: "10px", top: "10px", cursor: "pointer" }}
+                                    />
                                 </div>
+
 
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div className="form-check mb-0">
@@ -60,13 +123,13 @@ function Login() {
                                             Remember me
                                         </label>
                                     </div>
-                                    <a href="#!" className="text-body">Forgot password?</a>
+                                    <Link onClick={() => navigate('/forget-password')} className="text-body">Forgot password?</Link>
                                 </div>
 
                                 <div className="text-center text-lg-start mt-4 pt-2">
-                                    <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-primary btn-lg"
+                                    <button type="submit" data-mdb-button-init data-mdb-ripple-init className="btn btn-primary btn-lg"
                                         style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}>Login</button>
-                                    <p className="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <Link onClick = {()=>navigate('/register')}
+                                    <p className="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <Link onClick={() => navigate('/register')}
                                         className="link-danger">Register</Link></p>
                                 </div>
 
@@ -84,18 +147,18 @@ function Login() {
 
 
                     <div>
-                        <a href="#!" className="text-white me-4">
+                        <Link to="#!" className="text-white me-4">
                             <i className="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#!" className="text-white me-4">
+                        </Link>
+                        <Link to="#!" className="text-white me-4">
                             <i className="fab fa-twitter"></i>
-                        </a>
-                        <a href="#!" className="text-white me-4">
+                        </Link>
+                        <Link to="#!" className="text-white me-4">
                             <i className="fab fa-google"></i>
-                        </a>
-                        <a href="#!" className="text-white">
+                        </Link>
+                        <Link to="#!" className="text-white">
                             <i className="fab fa-linkedin-in"></i>
-                        </a>
+                        </Link>
                     </div>
 
                 </div>
